@@ -7,17 +7,25 @@ import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+
 public class TickTools implements DedicatedServerModInitializer {
     public static Logger LOGGER;
+    private final File configFile = FabricLoader.getInstance().getConfigDir().resolve("ticktools.json").toFile();
 
     @Override
     public void onInitializeServer() {
         ServerLifecycleEvents.SERVER_STARTING.register(this::onServerStart);
+        ServerLifecycleEvents.SERVER_STOPPING.register(this::onServerStop);
     }
 
     private void onServerStart(MinecraftServer server) {
         LOGGER = LogManager.getLogger();
-        var config = TickToolsConfig.parse(FabricLoader.getInstance().getConfigDir().resolve("ticktools.json"));
+        var config = TickToolsConfig.loadConfig(configFile);
         TickToolsManager.setInstance(new TickToolsManager(config));
+    }
+
+    private void onServerStop(MinecraftServer server) {
+        TickToolsManager.getInstance().config().saveConfig(configFile);
     }
 }

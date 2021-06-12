@@ -16,10 +16,10 @@ public record TickToolsManager(TickToolsConfig config) {
     }
 
     public boolean shouldTickChunk(ChunkPos pos, ServerWorld world) {
-        if (!config.isSplitTickDistance()) return true;
-        var player = world.getClosestPlayer(pos.getCenterX(), 64, pos.getCenterZ(), world.getHeight() + config.getTickDistance(), false);
+        if (!config.splitTickDistance) return true;
+        var player = world.getClosestPlayer(pos.getCenterX(), 64, pos.getCenterZ(), world.getHeight() + config.getTickDistanceBlocks(), false);
         if (player != null) {
-            if (player.getBlockPos().isWithinDistance(new BlockPos(pos.getCenterX(), player.getY(), pos.getCenterZ()), config.getTickDistance())) {
+            if (player.getBlockPos().isWithinDistance(new BlockPos(pos.getCenterX(), player.getY(), pos.getCenterZ()), config.getTickDistanceBlocks())) {
                 // The closest player on the server is within the tick distance provided by the config
                 return true;
             }

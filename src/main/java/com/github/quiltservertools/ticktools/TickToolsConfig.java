@@ -1,100 +1,72 @@
 package com.github.quiltservertools.ticktools;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
 
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 public class TickToolsConfig {
-    private boolean splitTickDistance;
-    private boolean dynamicTickDistance;
-    private boolean dynamicRenderDistance;
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private int tickDistance;
-    private int minTickDistance;
-    private int minRenderDistance;
+    public boolean splitTickDistance = true;
+    public int tickDistance = 2;
 
-    private TickToolsConfig(boolean splitTickDistance, int tickDistance, boolean dynamicTickDistance, int minTickDistance, boolean dynamicRenderDistance, int minRenderDistance) {
-        this.splitTickDistance = splitTickDistance;
-        this.dynamicTickDistance = dynamicTickDistance;
-        this.dynamicRenderDistance = dynamicRenderDistance;
-        // All params are measured in chunks
-        // But we want them to be measured in blocks, so we multiply by 16
-        this.tickDistance = tickDistance * 16;
-        this.minTickDistance = minTickDistance * 16;
-        this.minRenderDistance = minRenderDistance * 16;
+    public final TickToolsConfig.Dynamic dynamic = new Dynamic();
+
+    public static class Dynamic {
+        public boolean tickDistance;
+        public boolean renderDistance;
+        public int minTickDistance = 1;
+        public int minRenderDistance = 4;
+
+        public int getMinTickDistanceBlocks() {
+            return minTickDistance * 16;
+        }
+
+        public int getMinRenderDistanceBlocks() {
+            return minRenderDistance * 16;
+        }
     }
 
-    public boolean isSplitTickDistance() {
-        return splitTickDistance;
+    public int getTickDistanceBlocks() {
+        return tickDistance * 16;
     }
 
-    public boolean isDynamicTickDistance() {
-        return dynamicTickDistance;
-    }
+    public static TickToolsConfig loadConfig(File file) {
+        TickToolsConfig config = new TickToolsConfig();
 
-    public boolean isDynamicRenderDistance() {
-        return dynamicRenderDistance;
-    }
-
-    public int getTickDistance() {
-        return tickDistance;
-    }
-
-    public int getMinTickDistance() {
-        return minTickDistance;
-    }
-
-    public int getMinRenderDistance() {
-        return minRenderDistance;
-    }
-
-    public void setSplitTickDistance(boolean splitTickDistance) {
-        this.splitTickDistance = splitTickDistance;
-    }
-
-    public void setDynamicTickDistance(boolean dynamicTickDistance) {
-        this.dynamicTickDistance = dynamicTickDistance;
-    }
-
-    public void setDynamicRenderDistance(boolean dynamicRenderDistance) {
-        this.dynamicRenderDistance = dynamicRenderDistance;
-    }
-
-    public void setTickDistance(int tickDistance) {
-        this.tickDistance = tickDistance;
-    }
-
-    public void setMinTickDistance(int minTickDistance) {
-        this.minTickDistance = minTickDistance;
-    }
-
-    public void setMinRenderDistance(int minRenderDistance) {
-        this.minRenderDistance = minRenderDistance;
-    }
-
-    public static TickToolsConfig parse(Path path) {
-        try {
-            var json = new JsonParser().parse(Files.readString(path)).getAsJsonObject();
-            var splitTickDistance = json.get("split_tick_distance").getAsBoolean();
-            var tickDistance = json.get("tick_distance").getAsInt();
-            var dynamic = json.get("dynamic").getAsJsonObject();
-            var isDynamicTick = dynamic.get("dynamic_tick_distance").getAsBoolean();
-            var isDynamicRender = dynamic.get("dynamic_render_distance").getAsBoolean();
-            var minTickDistance = dynamic.get("min_tick_distance").getAsInt();
-            var minRenderDistance = dynamic.get("min_render_distance").getAsInt();
-            return new TickToolsConfig(splitTickDistance, tickDistance, isDynamicTick, minTickDistance, isDynamicRender, minRenderDistance);
-        } catch (IOException e) {
-            TickTools.LOGGER.info("Unable to find config file for TickTools, creating");
-            try {
-                Files.copy(Objects.requireNonNull(TickToolsConfig.class.getResourceAsStream("/data/ticktools/default_config.json")), path);
-            } catch (IOException ioException) {
-                TickTools.LOGGER.error("Unable to copy TickTools default config file");
+        if (file.exists() && file.isFile()) {
+            try (
+                    FileInputStream fileInputStream = new FileInputStream(file);
+                    InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
+                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
+            ) {
+                config = GSON.fromJson(bufferedReader, TickToolsConfig.class);
+            } catch (IOException e) {
+                TickTools.LOGGER.error("Failed to load config", e);
             }
-            return new TickToolsConfig(false, 0, false, 0, false, 0);
+        } else {
+            TickTools.LOGGER.info("Unable to find config file for TickTools, creating");
+        }
+
+        config.saveConfig(file);
+
+        return config;
+    }
+
+    public void saveConfig(File config) {
+        try (
+                FileOutputStream stream = new FileOutputStream(config);
+                Writer writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8)
+        ) {
+            GSON.toJson(this, writer);
+        } catch (IOException e) {
+            TickTools.LOGGER.error("Failed to save config", e);
         }
     }
 }
