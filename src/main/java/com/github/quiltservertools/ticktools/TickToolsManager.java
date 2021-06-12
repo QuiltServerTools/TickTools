@@ -21,7 +21,7 @@ public record TickToolsManager(TickToolsConfig config) {
         if (!config.splitTickDistance) return true;
         int tickDistance = config().getTickDistanceBlocks();
         // Now we call the dynamic tick distance check
-        if (config().dynamic.tickDistance) tickDistance = getEffectiveTickDistance(world.getServer());
+        if (config.dynamic.tickDistance) tickDistance = getEffectiveTickDistance(world.getServer());
         var player = world.getClosestPlayer(pos.getCenterX(), 64, pos.getCenterZ(), world.getHeight() + tickDistance, false);
         if (player != null) {
             if (player.getBlockPos().isWithinDistance(new BlockPos(pos.getCenterX(), player.getY(), pos.getCenterZ()), tickDistance)) {
@@ -35,11 +35,11 @@ public record TickToolsManager(TickToolsConfig config) {
 
     private int getEffectiveTickDistance(MinecraftServer server) {
         float time = server.getTickTime();
-        var distance = this.config.getTickDistanceBlocks();
+        var distance = config.getTickDistanceBlocks();
         if (time > 40F) distance = config.dynamic.getMinTickDistanceBlocks();
         else if (time > 32F) distance = Math.min(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
         else if (time > 25F) distance = Math.max(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
-        else distance = this.config.getTickDistanceBlocks();
+        else distance = config.getTickDistanceBlocks();
         return distance;
     }
 }

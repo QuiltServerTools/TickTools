@@ -2,13 +2,9 @@ package com.github.quiltservertools.ticktools;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Objects;
 
 public class TickToolsConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();

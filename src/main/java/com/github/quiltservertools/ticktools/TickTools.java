@@ -1,6 +1,8 @@
 package com.github.quiltservertools.ticktools;
 
+import com.github.quiltservertools.ticktools.command.Commands;
 import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
@@ -17,6 +19,7 @@ public class TickTools implements DedicatedServerModInitializer {
     public void onInitializeServer() {
         ServerLifecycleEvents.SERVER_STARTING.register(this::onServerStart);
         ServerLifecycleEvents.SERVER_STOPPING.register(this::onServerStop);
+        //CommandRegistrationCallback.EVENT.register(Commands::register);
     }
 
     private void onServerStart(MinecraftServer server) {
