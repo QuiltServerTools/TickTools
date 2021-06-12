@@ -15,7 +15,7 @@ public class MixinEntity {
     @Inject(method = "baseTick", at = @At("HEAD"), cancellable = true)
     public void ticktools$stopEntityTick(CallbackInfo ci) {
         // If chunk should not be ticked we cancel the rest of the method
-        if (!TickToolsManager.getInstance().shouldTickChunk(((LivingEntity) (Object) this).getChunkPos(), (ServerWorld) ((LivingEntity) (Object) this).getEntityWorld())) {
+        if (!TickToolsManager.getInstance().shouldTickChunk(((Entity) (Object) this).getChunkPos(), (ServerWorld) ((Entity) (Object) this).getEntityWorld())) {
             ci.cancel();
         }
     }
