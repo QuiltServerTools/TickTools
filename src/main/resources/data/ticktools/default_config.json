@@ -1,0 +1,11 @@
+{
+  "split_tick_distance": true,
+  "tick_distance": 2,
+  "dynamic": {
+    "dynamic_tick_distance": true,
+    "dynamic_render_distance": false,
+    "min_tick_distance": 1,
+    "min_render_distance": 4
+  },
+  "item_despawn_time": 4
+}
