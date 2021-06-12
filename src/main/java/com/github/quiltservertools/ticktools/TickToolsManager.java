@@ -18,10 +18,10 @@ public record TickToolsManager(TickToolsConfig config) {
 
     public boolean shouldTickChunk(ChunkPos pos, ServerWorld world) {
         // Ignore tick distance value if split tick distance is disabled
-        if (!config.isSplitTickDistance()) return true;
-        int tickDistance = config().getTickDistance();
+        if (!config.splitTickDistance) return true;
+        int tickDistance = config().getTickDistanceBlocks();
         // Now we call the dynamic tick distance check
-        if (config().isDynamicTickDistance()) tickDistance = getEffectiveTickDistance(world.getServer());
+        if (config().dynamic.tickDistance) tickDistance = getEffectiveTickDistance(world.getServer());
         var player = world.getClosestPlayer(pos.getCenterX(), 64, pos.getCenterZ(), world.getHeight() + tickDistance, false);
         if (player != null) {
             if (player.getBlockPos().isWithinDistance(new BlockPos(pos.getCenterX(), player.getY(), pos.getCenterZ()), tickDistance)) {
@@ -35,11 +35,11 @@ public record TickToolsManager(TickToolsConfig config) {
 
     private int getEffectiveTickDistance(MinecraftServer server) {
         float time = server.getTickTime();
-        var distance = this.config.getTickDistance();
-        if (time > 40F) distance = config.getMinTickDistance();
-        else if (time > 32F) distance = Math.min(config.getTickDistance() / 2, config.getMinTickDistance() * 2);
-        else if (time > 25F) distance = Math.max(config.getTickDistance() / 2, config.getMinTickDistance() * 2);
-        else distance = this.config.getTickDistance();
+        var distance = this.config.getTickDistanceBlocks();
+        if (time > 40F) distance = config.dynamic.getMinTickDistanceBlocks();
+        else if (time > 32F) distance = Math.min(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
+        else if (time > 25F) distance = Math.max(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
+        else distance = this.config.getTickDistanceBlocks();
         return distance;
     }
 }
