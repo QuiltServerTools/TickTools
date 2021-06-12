@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "ticktools",
+  "version": "1.0.0",
+
+  "name": "TickTools",
+  "description": "Allows for separate tick and render distances",
+  "authors": [
+    "yitzy299"
+  ],
+  "contact": {
+    "sources": "https://github.com/QuiltServerTools/TickTools"
+  },
+
+  "license": "MIT",
+
+  "environment": "*",
+  "entrypoints": {
+    "server": [
+      "com.github.quiltservertools.ticktools.TickTools"
+    ]
+  },
+  "mixins": [
+    "ticktools.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "minecraft": "1.17.x",
+    "java": ">=16"
+  }
+}
