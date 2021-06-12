@@ -19,7 +19,7 @@ public class TickTools implements DedicatedServerModInitializer {
     public void onInitializeServer() {
         ServerLifecycleEvents.SERVER_STARTING.register(this::onServerStart);
         ServerLifecycleEvents.SERVER_STOPPING.register(this::onServerStop);
-        //CommandRegistrationCallback.EVENT.register(Commands::register);
+        CommandRegistrationCallback.EVENT.register(Commands::register);
     }
 
     private void onServerStart(MinecraftServer server) {
