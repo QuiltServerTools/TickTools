@@ -1,5 +1,6 @@
 package com.github.quiltservertools.ticktools.command;
 
+import com.github.quiltservertools.ticktools.command.subcommand.DistanceSubCommand;
 import com.github.quiltservertools.ticktools.command.subcommand.DynamicSubCommand;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.server.command.CommandManager;
@@ -10,5 +11,6 @@ public class Commands {
         var node = dispatcher.register(CommandManager.literal("ticktools"));
         dispatcher.getRoot().addChild(node);
         DynamicSubCommand.register(node);
+        DistanceSubCommand.register(node);
     }
 }
