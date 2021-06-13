@@ -10,15 +10,15 @@ public class DynamicSubCommand {
     public static void register(CommandNode<ServerCommandSource> root) {
         final var distanceArg = CommandManager.argument("distance", IntegerArgumentType.integer(2));
         var node = CommandManager.literal("dynamic")
-                .then(CommandManager.literal("tick").then(distanceArg).executes(ctx ->
+                .then(CommandManager.literal("tick").then(distanceArg.executes(ctx ->
                         setDynamicInfo(true, IntegerArgumentType.getInteger(ctx, "distance"),
-                                TickToolsManager.getInstance().config().dynamic.renderDistance, TickToolsManager.getInstance().config().dynamic.minRenderDistance))
+                                TickToolsManager.getInstance().config().dynamic.renderDistance, TickToolsManager.getInstance().config().dynamic.minRenderDistance)))
                         .then(CommandManager.literal("disable").executes(ctx ->
                                 setDynamicInfo(false, 0,
-                                        TickToolsManager.getInstance().config().dynamic.renderDistance, TickToolsManager.getInstance().config().dynamic.minRenderDistance)))
-                        .then(CommandManager.literal("view")).then(distanceArg).executes(ctx ->
+                                        TickToolsManager.getInstance().config().dynamic.renderDistance, TickToolsManager.getInstance().config().dynamic.minRenderDistance))))
+                        .then(CommandManager.literal("view").then(distanceArg.executes(ctx ->
                                 setDynamicInfo(TickToolsManager.getInstance().config().dynamic.tickDistance, TickToolsManager.getInstance().config().dynamic.minTickDistance,
-                                        true, IntegerArgumentType.getInteger(ctx, "distance")))
+                                        true, IntegerArgumentType.getInteger(ctx, "distance"))))
                         .then(CommandManager.literal("disable").executes(ctx ->
                                 setDynamicInfo(TickToolsManager.getInstance().config().dynamic.tickDistance, TickToolsManager.getInstance().config().dynamic.minTickDistance,
                                         false, TickToolsManager.getInstance().config().dynamic.minRenderDistance))))
