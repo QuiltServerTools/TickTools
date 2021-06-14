@@ -24,10 +24,8 @@ public record TickToolsManager(TickToolsConfig config) {
         if (config.dynamic.tickDistance) tickDistance = getEffectiveTickDistance(world.getServer());
         var player = world.getClosestPlayer(pos.getCenterX(), 64, pos.getCenterZ(), world.getHeight() + tickDistance, false);
         if (player != null) {
-            if (player.getBlockPos().isWithinDistance(new BlockPos(pos.getCenterX(), player.getY(), pos.getCenterZ()), tickDistance)) {
-                // The closest player on the server is within the tick distance provided by the config
-                return true;
-            }
+            // The closest player on the server is within the tick distance provided by the config
+            return player.getBlockPos().isWithinDistance(new BlockPos(pos.getCenterX(), player.getY(), pos.getCenterZ()), tickDistance);
             // If player is not found within distance then use default return value
         }
         return false;

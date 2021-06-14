@@ -3,6 +3,7 @@ package com.github.quiltservertools.ticktools.command.subcommand;
 import com.github.quiltservertools.ticktools.TickToolsManager;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.tree.CommandNode;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
@@ -11,6 +12,7 @@ public class DynamicSubCommand {
     public static void register(CommandNode<ServerCommandSource> root) {
         final var distanceArg = CommandManager.argument("distance", IntegerArgumentType.integer(2));
         var node = CommandManager.literal("dynamic")
+                .requires(scs -> Permissions.check(scs, "ticktools.command.dynamic", 3))
                 .then(CommandManager.literal("tick").then(distanceArg.executes(ctx ->
                         setDynamicInfo(true, IntegerArgumentType.getInteger(ctx, "distance"),
                                 TickToolsManager.getInstance().config().dynamic.renderDistance, TickToolsManager.getInstance().config().dynamic.minRenderDistance, ctx.getSource())))

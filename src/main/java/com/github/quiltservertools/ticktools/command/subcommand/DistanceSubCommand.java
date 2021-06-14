@@ -3,13 +3,14 @@ package com.github.quiltservertools.ticktools.command.subcommand;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.CommandNode;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralText;
 
 public class DistanceSubCommand {
     public static void register(CommandNode<ServerCommandSource> root) {
-        var node =  CommandManager.literal("render").then(CommandManager.argument("distance", IntegerArgumentType.integer(2))
+        var node =  CommandManager.literal("render").requires(scs -> Permissions.check(scs, "ticktools.command.distance", 3)).then(CommandManager.argument("distance", IntegerArgumentType.integer(2))
                 .executes(ctx -> setRenderDistance(ctx, IntegerArgumentType.getInteger(ctx, "distance")))).build();
         root.addChild(node);
         node = CommandManager.literal("tick").then(CommandManager.argument("distance", IntegerArgumentType.integer(2))
