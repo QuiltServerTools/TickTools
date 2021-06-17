@@ -1,2 +1,2 @@
 # TickTools
-A Minecraft mod for managing runtime dimensions
+A Minecraft mod for managing tick-related things
