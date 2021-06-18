@@ -11,6 +11,7 @@ public class TickToolsConfig {
 
     public boolean splitTickDistance = true;
     public int tickDistance = 2;
+    public int itemDespawnTicks = 6000;
 
     public final TickToolsConfig.Dynamic dynamic = new Dynamic();
 
