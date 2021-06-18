@@ -31,13 +31,38 @@ public record TickToolsManager(TickToolsConfig config) {
         return false;
     }
 
+    public void updateRenderDistance(ServerWorld world) {
+        if (config.dynamic.renderDistance) {
+            world.getChunkManager().applyViewDistance(getEffectiveRenderDistance(world.getServer()));
+        }
+    }
+
     private int getEffectiveTickDistance(MinecraftServer server) {
         float time = server.getTickTime();
+        int performanceLevel = getPerformanceLevel(time);
         var distance = config.getTickDistanceBlocks();
-        if (time > 40F) distance = config.dynamic.getMinTickDistanceBlocks();
-        else if (time > 32F) distance = Math.min(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
-        else if (time > 25F) distance = Math.max(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
+        if (performanceLevel == 3) distance = config.dynamic.getMinTickDistanceBlocks();
+        else if (performanceLevel == 2) distance = Math.min(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
+        else if (performanceLevel == 1) distance = Math.max(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
         else distance = config.getTickDistanceBlocks();
         return distance;
+    }
+
+    private int getEffectiveRenderDistance(MinecraftServer server) {
+        float time = server.getTickTime();
+        int performanceLevel = getPerformanceLevel(time);
+        var distance = config().dynamic.maxRenderDistance;
+        if (performanceLevel == 3) distance = config.dynamic.getMinRenderDistanceBlocks();
+        else if (performanceLevel == 2) distance = Math.min(config.dynamic.getMaxRenderDistanceBlocks() / 2, config.dynamic.getMinRenderDistanceBlocks() * 2);
+        else if (performanceLevel == 1) distance = Math.max(config.dynamic.getMaxRenderDistanceBlocks() / 2, config.dynamic.getMinRenderDistanceBlocks() * 2);
+        else distance = config.dynamic.getMinRenderDistanceBlocks();
+        return distance;
+    }
+
+    private int getPerformanceLevel(float time) {
+        if (time > 40F) return 3;
+        else if (time > 32F) return 2;
+        else if (time > 25F) return 1;
+        return 1;
     }
 }

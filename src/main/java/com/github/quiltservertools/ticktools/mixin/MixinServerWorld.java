@@ -9,6 +9,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.function.BooleanSupplier;
+
 @Mixin(ServerWorld.class)
 public class MixinServerWorld {
     @Inject(method = "tickEntity", at = @At("HEAD"), cancellable = true)
@@ -22,6 +24,13 @@ public class MixinServerWorld {
     public void ticktools$stopChunkTicks(WorldChunk chunk, int randomTickSpeed, CallbackInfo ci) {
         if (!TickToolsManager.getInstance().shouldTickChunk(chunk.getPos(), (ServerWorld) (Object) this) && chunk.getInhabitedTime() != 0) {
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    public void ticktools$updateDynamics(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+        if (((ServerWorld) (Object) this).getTime() % 1000 == 0) {
+            TickToolsManager.getInstance().updateRenderDistance((ServerWorld) (Object) this);
         }
     }
 }

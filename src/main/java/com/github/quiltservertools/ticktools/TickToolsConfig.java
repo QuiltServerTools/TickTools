@@ -20,6 +20,7 @@ public class TickToolsConfig {
         public boolean renderDistance;
         public int minTickDistance = 1;
         public int minRenderDistance = 4;
+        public int maxRenderDistance = 8;
 
         public int getMinTickDistanceBlocks() {
             return minTickDistance * 16;
@@ -27,6 +28,10 @@ public class TickToolsConfig {
 
         public int getMinRenderDistanceBlocks() {
             return minRenderDistance * 16;
+        }
+
+        public int getMaxRenderDistanceBlocks() {
+            return maxRenderDistance * 16;
         }
     }
 
