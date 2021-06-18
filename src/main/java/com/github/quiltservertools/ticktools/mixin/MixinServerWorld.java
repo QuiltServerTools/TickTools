@@ -20,7 +20,7 @@ public class MixinServerWorld {
 
     @Inject(method = "tickChunk", at = @At("HEAD"), cancellable = true)
     public void ticktools$stopChunkTicks(WorldChunk chunk, int randomTickSpeed, CallbackInfo ci) {
-        if (!TickToolsManager.getInstance().shouldTickChunk(chunk.getPos(), (ServerWorld) (Object) this)) {
+        if (!TickToolsManager.getInstance().shouldTickChunk(chunk.getPos(), (ServerWorld) (Object) this) && chunk.getInhabitedTime() != 0) {
             ci.cancel();
         }
     }
