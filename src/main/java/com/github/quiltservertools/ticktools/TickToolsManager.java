@@ -1,5 +1,7 @@
 package com.github.quiltservertools.ticktools;
 
+import com.github.quiltservertools.ticktools.mixin.MixinThreadedAnvilChunkStorage;
+import net.minecraft.network.packet.s2c.play.ChunkLoadDistanceS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -33,7 +35,11 @@ public record TickToolsManager(TickToolsConfig config) {
 
     public void updateRenderDistance(ServerWorld world) {
         if (config.dynamic.renderDistance) {
-            world.getChunkManager().applyViewDistance(getEffectiveRenderDistance(world.getServer()));
+            int distance = getEffectiveRenderDistance(world.getServer());
+            if (((MixinThreadedAnvilChunkStorage) world.getChunkManager().threadedAnvilChunkStorage).getWatchDistance() != distance) {
+                world.getChunkManager().applyViewDistance(distance);
+                world.getServer().getPlayerManager().sendToAll(new ChunkLoadDistanceS2CPacket(distance));
+            }
         }
     }
 
