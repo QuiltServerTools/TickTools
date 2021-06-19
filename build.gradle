@@ -1,6 +1,7 @@
 plugins {
 	id 'fabric-loom' version '0.8-SNAPSHOT'
 	id 'maven-publish'
+	id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
 
 sourceCompatibility = JavaVersion.VERSION_16
@@ -15,7 +16,7 @@ repositories {
 		name = "JitPack"
 		url = "https://jitpack.io"
 	}
-
+	mavenCentral()
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
@@ -29,6 +30,8 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	include(modImplementation("me.lucko:fabric-permissions-api:0.1-SNAPSHOT"))
+
+	implementation(shadow("com.moandjiezana.toml:toml4j:0.7.2"))
 
 	modRuntime ("com.github.SuperCoder7979:databreaker:0.2.6") {
 		exclude module: "fabric-loader"

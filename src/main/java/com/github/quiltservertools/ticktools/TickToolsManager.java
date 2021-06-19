@@ -52,10 +52,10 @@ public record TickToolsManager(TickToolsConfig config) {
         float time = server.getTickTime();
         int performanceLevel = getPerformanceLevel(time);
         var distance = config().dynamic.maxRenderDistance;
-        if (performanceLevel == 3) distance = config.dynamic.getMinRenderDistanceBlocks();
-        else if (performanceLevel == 2) distance = Math.min(config.dynamic.getMaxRenderDistanceBlocks() / 2, config.dynamic.getMinRenderDistanceBlocks() * 2);
-        else if (performanceLevel == 1) distance = Math.max(config.dynamic.getMaxRenderDistanceBlocks() / 2, config.dynamic.getMinRenderDistanceBlocks() * 2);
-        else distance = config.dynamic.getMinRenderDistanceBlocks();
+        if (performanceLevel == 3) distance = config.dynamic.minRenderDistance;
+        else if (performanceLevel == 2) distance = Math.min(config.dynamic.maxRenderDistance / 2, config.dynamic.minRenderDistance * 2);
+        else if (performanceLevel == 1) distance = Math.max(config.dynamic.maxRenderDistance / 2, config.dynamic.minRenderDistance * 2);
+        else distance = config.dynamic.minRenderDistance;
         return distance;
     }
 

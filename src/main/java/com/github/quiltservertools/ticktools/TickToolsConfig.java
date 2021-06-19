@@ -1,13 +1,13 @@
 package com.github.quiltservertools.ticktools;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.moandjiezana.toml.Toml;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Objects;
 
 public class TickToolsConfig {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public boolean splitTickDistance = true;
     public int tickDistance = 2;
@@ -43,33 +43,37 @@ public class TickToolsConfig {
         TickToolsConfig config = new TickToolsConfig();
 
         if (file.exists() && file.isFile()) {
-            try (
-                    FileInputStream fileInputStream = new FileInputStream(file);
-                    InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
-                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
-            ) {
-                config = GSON.fromJson(bufferedReader, TickToolsConfig.class);
-            } catch (IOException e) {
-                TickTools.LOGGER.error("Failed to load config", e);
-            }
+            Toml toml = new Toml().read(file);
+            config.readToml(toml);
         } else {
             TickTools.LOGGER.info("Unable to find config file for TickTools, creating");
+            try {
+                Files.copy(Objects.requireNonNull(TickToolsConfig.class.getResourceAsStream("/data/ticktools/default_config.toml")), file.toPath());
+            } catch (IOException e) {
+                TickTools.LOGGER.warn("Unable to create config file for TickTools, using default configuration");
+            }
         }
 
-        config.saveConfig(file);
-
+        // Config is default config
         return config;
     }
 
-    public void saveConfig(File config) {
-        try (
-                FileOutputStream stream = new FileOutputStream(config);
-                Writer writer = new OutputStreamWriter(stream, StandardCharsets.UTF_8)
-        ) {
-            GSON.toJson(this, writer);
-        } catch (IOException e) {
-            TickTools.LOGGER.error("Failed to save config", e);
+    private void readToml(Toml toml) {
+        this.splitTickDistance = toml.getBoolean("splitTickDistance");
+        if (splitTickDistance) {
+            this.tickDistance = toml.getLong("tickDistance").intValue();
         }
+        Toml dynamicTable = toml.getTable("dynamic");
+        this.dynamic.tickDistance = dynamicTable.getBoolean("dynamicTickDistance");
+        if (dynamic.tickDistance) {
+            dynamic.minTickDistance = dynamicTable.getLong("minTickDistance").intValue();
+        }
+        this.dynamic.renderDistance = dynamicTable.getBoolean("dynamicRenderDistance");
+        if (dynamic.renderDistance) {
+            dynamic.minRenderDistance = dynamicTable.getLong("minRenderDistance").intValue();
+            dynamic.maxRenderDistance = dynamicTable.getLong("maxRenderDistance").intValue();
+        }
+        this.itemDespawnTicks = toml.getLong("itemDespawnTicks").intValue();
     }
 }
 
