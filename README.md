@@ -34,7 +34,7 @@ maxRenderDistance = 10
 
 `minRenderDistance` controls the minimum render distance when `dynamicRenderDistance` is enabled
 
-`mixRenderDistance` controls the maximum render distance when `dynamicRenderDistance` is enabled
+`maxRenderDistance` controls the maximum render distance when `dynamicRenderDistance` is enabled
 
 
 ## Discuss
