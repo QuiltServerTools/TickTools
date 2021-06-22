@@ -20,7 +20,7 @@ public class TickTools implements DedicatedServerModInitializer {
 
     private void onServerStart(MinecraftServer server) {
         LOGGER = LogManager.getLogger();
-        var config = TickToolsConfig.loadConfig(configFile);
+        var config = TickToolsConfig.loadConfig(configFile, server);
         TickToolsManager.setInstance(new TickToolsManager(config));
     }
 }
