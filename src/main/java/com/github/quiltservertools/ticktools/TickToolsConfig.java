@@ -1,6 +1,9 @@
 package com.github.quiltservertools.ticktools;
 
+import com.github.quiltservertools.ticktools.mixin.MixinThreadedAnvilChunkStorage;
 import com.moandjiezana.toml.Toml;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,12 +42,11 @@ public class TickToolsConfig {
         return tickDistance * 16;
     }
 
-    public static TickToolsConfig loadConfig(File file) {
+    public static TickToolsConfig loadConfig(File file, MinecraftServer server) {
         TickToolsConfig config = new TickToolsConfig();
-
         if (file.exists() && file.isFile()) {
             Toml toml = new Toml().read(file);
-            config.readToml(toml);
+            config.readToml(toml, server);
         } else {
             TickTools.LOGGER.info("Unable to find config file for TickTools, creating");
             try {
@@ -58,7 +60,7 @@ public class TickToolsConfig {
         return config;
     }
 
-    private void readToml(Toml toml) {
+    private void readToml(Toml toml, MinecraftServer server) {
         this.splitTickDistance = toml.getBoolean("splitTickDistance");
         if (splitTickDistance) {
             this.tickDistance = toml.getLong("tickDistance").intValue();
@@ -71,7 +73,7 @@ public class TickToolsConfig {
         this.dynamic.renderDistance = dynamicTable.getBoolean("dynamicRenderDistance");
         if (dynamic.renderDistance) {
             dynamic.minRenderDistance = dynamicTable.getLong("minRenderDistance").intValue();
-            dynamic.maxRenderDistance = dynamicTable.getLong("maxRenderDistance").intValue();
+            dynamic.maxRenderDistance = ((MixinThreadedAnvilChunkStorage)server.getOverworld().getChunkManager().threadedAnvilChunkStorage).getWatchDistance();
         }
         this.itemDespawnTicks = toml.getLong("itemDespawnTicks").intValue();
     }
