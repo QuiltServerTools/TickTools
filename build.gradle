@@ -31,7 +31,7 @@ dependencies {
 
 	include(modImplementation("me.lucko:fabric-permissions-api:0.1-SNAPSHOT"))
 
-	implementation(shadow("com.moandjiezana.toml:toml4j:0.7.2"))
+	implementation(include("com.moandjiezana.toml:toml4j:0.7.2"))
 
 	modRuntime ("com.github.SuperCoder7979:databreaker:0.2.6") {
 		exclude module: "fabric-loader"
