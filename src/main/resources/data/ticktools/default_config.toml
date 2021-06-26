@@ -7,3 +7,4 @@ dynamicTickDistance = false
 minTickDistance = 4
 dynamicRenderDistance = false
 minRenderDistance = 4
+maxRenderDistance = 12
