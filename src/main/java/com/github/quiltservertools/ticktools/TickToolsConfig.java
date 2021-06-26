@@ -73,7 +73,7 @@ public class TickToolsConfig {
         this.dynamic.renderDistance = dynamicTable.getBoolean("dynamicRenderDistance");
         if (dynamic.renderDistance) {
             dynamic.minRenderDistance = dynamicTable.getLong("minRenderDistance").intValue();
-            dynamic.maxRenderDistance = dynamicTable.getLong("maxRenderDistance").intValue()
+            dynamic.maxRenderDistance = dynamicTable.getLong("maxRenderDistance").intValue();
         }
         this.itemDespawnTicks = toml.getLong("itemDespawnTicks").intValue();
     }
