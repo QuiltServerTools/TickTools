@@ -23,11 +23,15 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
     }
 
     public boolean shouldTickChunk(ChunkPos pos, ServerWorld world) {
+        // First we get the right config, so checking if worldSpecific contains the dimension
+        var effectiveConfig = worldSpecific().get(world.getRegistryKey().getValue());
+        if (effectiveConfig == null) effectiveConfig = this.config();
+
         // Ignore tick distance value if split tick distance is disabled
-        if (!config.splitTickDistance) return true;
-        int tickDistance = config().getTickDistanceBlocks();
+        if (!effectiveConfig.splitTickDistance) return true;
+        int tickDistance = effectiveConfig.getTickDistanceBlocks();
         // Now we call the dynamic tick distance check
-        if (config.dynamic.tickDistance) tickDistance = getEffectiveTickDistance(world.getServer());
+        if (effectiveConfig.dynamic.tickDistance) tickDistance = getEffectiveTickDistance(world.getServer());
         var player = world.getClosestPlayer(pos.getCenterX(), 64, pos.getCenterZ(), world.getHeight() + tickDistance, false);
         if (player != null) {
             // The closest player on the server is within the tick distance provided by the config
@@ -38,6 +42,8 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
     }
 
     public void updateRenderDistance(ServerWorld world) {
+        var config = worldSpecific().get(world.getRegistryKey().getValue());
+        if (config == null) config = this.config();
         if (config.dynamic.renderDistance) {
             int distance = getEffectiveRenderDistance(world.getServer());
             if (((MixinThreadedAnvilChunkStorage) world.getChunkManager().threadedAnvilChunkStorage).getWatchDistance() != distance) {
@@ -52,8 +58,10 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
         int performanceLevel = getPerformanceLevel(time);
         var distance = config.getTickDistanceBlocks();
         if (performanceLevel == 3) distance = config.dynamic.getMinTickDistanceBlocks();
-        else if (performanceLevel == 2) distance = Math.min(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
-        else if (performanceLevel == 1) distance = Math.max(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
+        else if (performanceLevel == 2)
+            distance = Math.min(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
+        else if (performanceLevel == 1)
+            distance = Math.max(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
         else distance = config.getTickDistanceBlocks();
         return distance;
     }
@@ -63,8 +71,10 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
         int performanceLevel = getPerformanceLevel(time);
         var distance = config().dynamic.maxRenderDistance;
         if (performanceLevel == 3) distance = config.dynamic.minRenderDistance;
-        else if (performanceLevel == 2) distance = Math.min(config.dynamic.maxRenderDistance / 2, config.dynamic.minRenderDistance * 2);
-        else if (performanceLevel == 1) distance = Math.max(config.dynamic.maxRenderDistance / 2, config.dynamic.minRenderDistance * 2);
+        else if (performanceLevel == 2)
+            distance = Math.min(config.dynamic.maxRenderDistance / 2, config.dynamic.minRenderDistance * 2);
+        else if (performanceLevel == 1)
+            distance = Math.max(config.dynamic.maxRenderDistance / 2, config.dynamic.minRenderDistance * 2);
         else distance = config.dynamic.minRenderDistance;
         return distance;
     }
