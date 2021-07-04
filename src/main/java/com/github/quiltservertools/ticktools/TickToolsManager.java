@@ -4,10 +4,14 @@ import com.github.quiltservertools.ticktools.mixin.MixinThreadedAnvilChunkStorag
 import net.minecraft.network.packet.s2c.play.ChunkLoadDistanceS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 
-public record TickToolsManager(TickToolsConfig config) {
+import java.util.Map;
+
+public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickToolsConfig> worldSpecific) {
+
     private static TickToolsManager instance;
 
     public static TickToolsManager getInstance() {

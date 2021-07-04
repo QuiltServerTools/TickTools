@@ -4,10 +4,14 @@ import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.WorldEvents;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.HashMap;
 
 public class TickTools implements DedicatedServerModInitializer {
     public static Logger LOGGER;
@@ -20,7 +24,12 @@ public class TickTools implements DedicatedServerModInitializer {
 
     private void onServerStart(MinecraftServer server) {
         LOGGER = LogManager.getLogger();
-        var config = TickToolsConfig.loadConfig(configFile, server);
-        TickToolsManager.setInstance(new TickToolsManager(config));
+        var config = TickToolsConfig.loadConfig(configFile);
+
+        // Empty map for world specific distances
+        // These are added on world load rather than on server start
+        var worlds = new HashMap<Identifier, TickToolsConfig>();
+
+        TickToolsManager.setInstance(new TickToolsManager(config, worlds));
     }
 }
