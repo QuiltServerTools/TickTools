@@ -37,7 +37,7 @@ public class TickTools implements DedicatedServerModInitializer {
 
     private void onWorldLoad(MinecraftServer server, ServerWorld world) {
         var identifier = world.getRegistryKey().getValue();
-        var table = TickToolsManager.getInstance().config().toml.getTable(identifier.toString());
+        var table = TickToolsManager.getInstance().config().toml.getTable(identifier.getPath());
 
         // If table isn't null then we know that it exists
         if (table != null) {

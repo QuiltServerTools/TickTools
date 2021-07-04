@@ -11,7 +11,7 @@ maxRenderDistance = 12
 
 # Example config for world specific
 # Uncomment to use
-#[minecraft:the_nether]
+#[the_nether]
     #splitTickDistance = true
     #tickDistance = 8
     #itemDespawnTicks = 6000
