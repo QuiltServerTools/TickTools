@@ -1,9 +1,6 @@
 package com.github.quiltservertools.ticktools;
 
-import com.github.quiltservertools.ticktools.mixin.MixinThreadedAnvilChunkStorage;
 import com.moandjiezana.toml.Toml;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
 
 import java.io.File;
 import java.io.IOException;

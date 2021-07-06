@@ -3,11 +3,12 @@ package com.github.quiltservertools.ticktools;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.WorldEvents;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,6 +24,7 @@ public class TickTools implements DedicatedServerModInitializer {
         ServerLifecycleEvents.SERVER_STARTING.register(this::onServerStart);
         ServerWorldEvents.LOAD.register(this::onWorldLoad);
         ServerWorldEvents.UNLOAD.register(this::onWorldUnload);
+        ServerPlayConnectionEvents.JOIN.register(this::onPlayerConnect);
     }
 
     private void onServerStart(MinecraftServer server) {
@@ -31,9 +33,7 @@ public class TickTools implements DedicatedServerModInitializer {
 
         // Empty map for world specific distances
         // These are added on world load rather than on server start
-        var worlds = new HashMap<Identifier, TickToolsConfig>();
-
-        TickToolsManager.setInstance(new TickToolsManager(config, worlds));
+        TickToolsManager.setInstance(new TickToolsManager(config, new HashMap<>(), new HashMap<>()));
     }
 
     private void onWorldLoad(MinecraftServer server, ServerWorld world) {
@@ -50,5 +50,16 @@ public class TickTools implements DedicatedServerModInitializer {
 
     private void onWorldUnload(MinecraftServer server, ServerWorld world) {
         TickToolsManager.getInstance().worldSpecific().remove(world.getRegistryKey().getValue());
+    }
+
+    private void onPlayerConnect(ServerPlayNetworkHandler handler, PacketSender sender, MinecraftServer server) {
+        var table = TickToolsManager.getInstance().config().toml.getTable(handler.player.getUuidAsString());
+
+        // If table isn't null then we know that it exists
+        if (table != null) {
+            var config = new TickToolsConfig();
+            config.readToml(table);
+            TickToolsManager.getInstance().playerSpecific().put(handler.player.getUuid(), config);
+        }
     }
 }
