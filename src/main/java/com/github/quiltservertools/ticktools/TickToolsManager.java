@@ -48,8 +48,10 @@ public record TickToolsManager(TickToolsConfig config) {
         int performanceLevel = getPerformanceLevel(time);
         var distance = config.getTickDistanceBlocks();
         if (performanceLevel == 3) distance = config.dynamic.getMinTickDistanceBlocks();
-        else if (performanceLevel == 2) distance = Math.min(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
-        else if (performanceLevel == 1) distance = Math.max(config.getTickDistanceBlocks() / 2, config.getTickDistanceBlocks() * 2);
+        else if (performanceLevel == 2)
+            distance = Math.min((int)(config.getTickDistanceBlocks() / 1.5F), (int)(config.getTickDistanceBlocks() * 1.5F));
+        else if (performanceLevel == 1)
+            distance = Math.max((int)(config.getTickDistanceBlocks() / 1.5F), (int)(config.getTickDistanceBlocks() * 1.5F));
         else distance = config.getTickDistanceBlocks();
         return distance;
     }
@@ -59,8 +61,10 @@ public record TickToolsManager(TickToolsConfig config) {
         int performanceLevel = getPerformanceLevel(time);
         var distance = config().dynamic.maxRenderDistance;
         if (performanceLevel == 3) distance = config.dynamic.minRenderDistance;
-        else if (performanceLevel == 2) distance = Math.min(config.dynamic.maxRenderDistance / 2, config.dynamic.minRenderDistance * 2);
-        else if (performanceLevel == 1) distance = Math.max(config.dynamic.maxRenderDistance / 2, config.dynamic.minRenderDistance * 2);
+        else if (performanceLevel == 2)
+            distance = Math.min((int) (config.dynamic.maxRenderDistance / 1.5F), (int) (config.dynamic.minRenderDistance * 1.5F));
+        else if (performanceLevel == 1)
+            distance = Math.max((int) (config.dynamic.maxRenderDistance / 1.5F), (int) (config.dynamic.minRenderDistance * 1.5F));
         else distance = config.dynamic.minRenderDistance;
         return distance;
     }
