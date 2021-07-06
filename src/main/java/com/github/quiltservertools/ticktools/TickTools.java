@@ -22,6 +22,7 @@ public class TickTools implements DedicatedServerModInitializer {
     public void onInitializeServer() {
         ServerLifecycleEvents.SERVER_STARTING.register(this::onServerStart);
         ServerWorldEvents.LOAD.register(this::onWorldLoad);
+        ServerWorldEvents.UNLOAD.register(this::onWorldUnload);
     }
 
     private void onServerStart(MinecraftServer server) {
@@ -45,5 +46,9 @@ public class TickTools implements DedicatedServerModInitializer {
             config.readToml(table);
             TickToolsManager.getInstance().worldSpecific().put(identifier, config);
         }
+    }
+
+    private void onWorldUnload(MinecraftServer server, ServerWorld world) {
+        TickToolsManager.getInstance().worldSpecific().remove(world.getRegistryKey().getValue());
     }
 }
