@@ -3,11 +3,17 @@ package com.github.quiltservertools.ticktools;
 import com.github.quiltservertools.ticktools.mixin.MixinThreadedAnvilChunkStorage;
 import net.minecraft.network.packet.s2c.play.ChunkLoadDistanceS2CPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 
-public record TickToolsManager(TickToolsConfig config) {
+import java.util.Map;
+import java.util.UUID;
+
+public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickToolsConfig> worldSpecific, Map<UUID, TickToolsConfig> playerSpecific) {
+
     private static TickToolsManager instance;
 
     public static TickToolsManager getInstance() {
@@ -19,21 +25,31 @@ public record TickToolsManager(TickToolsConfig config) {
     }
 
     public boolean shouldTickChunk(ChunkPos pos, ServerWorld world) {
+        // First we get the right config, so checking if worldSpecific contains the dimension
+        var effectiveConfig = worldSpecific().get(world.getRegistryKey().getValue());
+        if (effectiveConfig == null) effectiveConfig = this.config();
+
         // Ignore tick distance value if split tick distance is disabled
-        if (!config.splitTickDistance) return true;
-        int tickDistance = config().getTickDistanceBlocks();
+        if (!effectiveConfig.splitTickDistance) return true;
+        int tickDistance = effectiveConfig.getTickDistanceBlocks();
         // Now we call the dynamic tick distance check
-        if (config.dynamic.tickDistance) tickDistance = getEffectiveTickDistance(world.getServer());
+        if (effectiveConfig.dynamic.tickDistance) tickDistance = getEffectiveTickDistance(world.getServer());
         var player = world.getClosestPlayer(pos.getCenterX(), 64, pos.getCenterZ(), world.getHeight() + tickDistance, false);
         if (player != null) {
-            // The closest player on the server is within the tick distance provided by the config
-            return player.getBlockPos().isWithinDistance(new BlockPos(pos.getCenterX(), player.getY(), pos.getCenterZ()), tickDistance);
-            // If player is not found within distance then use default return value
+            if (playerSpecific.containsKey(player.getUuid())) {
+                return player.getBlockPos().isWithinDistance(new BlockPos(pos.getCenterX(), player.getY(), pos.getCenterZ()), playerSpecific.get(player.getUuid()).tickDistance);
+            } else {
+                // The closest player on the server is within the tick distance provided by the config
+                return player.getBlockPos().isWithinDistance(new BlockPos(pos.getCenterX(), player.getY(), pos.getCenterZ()), tickDistance);
+                // If player is not found within distance then use default return value
+            }
         }
         return false;
     }
 
     public void updateRenderDistance(ServerWorld world) {
+        var config = worldSpecific().get(world.getRegistryKey().getValue());
+        if (config == null) config = this.config();
         if (config.dynamic.renderDistance) {
             int distance = getEffectiveRenderDistance(world.getServer());
             if (((MixinThreadedAnvilChunkStorage) world.getChunkManager().threadedAnvilChunkStorage).getWatchDistance() != distance) {

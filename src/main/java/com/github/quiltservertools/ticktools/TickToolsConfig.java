@@ -1,9 +1,6 @@
 package com.github.quiltservertools.ticktools;
 
-import com.github.quiltservertools.ticktools.mixin.MixinThreadedAnvilChunkStorage;
 import com.moandjiezana.toml.Toml;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,14 +13,15 @@ public class TickToolsConfig {
     public int tickDistance = 2;
     public int itemDespawnTicks = 6000;
 
-    public final TickToolsConfig.Dynamic dynamic = new Dynamic();
+    public TickToolsConfig.Dynamic dynamic = new Dynamic();
+    public Toml toml;
 
     public static class Dynamic {
         public boolean tickDistance;
         public boolean renderDistance;
-        public int minTickDistance = 1;
-        public int minRenderDistance = 4;
-        public int maxRenderDistance = 8;
+        public int minTickDistance = 4;
+        public int minRenderDistance = 8;
+        public int maxRenderDistance = 12;
 
         public int getMinTickDistanceBlocks() {
             return minTickDistance * 16;
@@ -42,11 +40,11 @@ public class TickToolsConfig {
         return tickDistance * 16;
     }
 
-    public static TickToolsConfig loadConfig(File file, MinecraftServer server) {
+    public static TickToolsConfig loadConfig(File file) {
         TickToolsConfig config = new TickToolsConfig();
         if (file.exists() && file.isFile()) {
             Toml toml = new Toml().read(file);
-            config.readToml(toml, server);
+            config.readToml(toml);
         } else {
             TickTools.LOGGER.info("Unable to find config file for TickTools, creating");
             try {
@@ -60,7 +58,7 @@ public class TickToolsConfig {
         return config;
     }
 
-    private void readToml(Toml toml, MinecraftServer server) {
+    protected void readToml(Toml toml) {
         this.splitTickDistance = toml.getBoolean("splitTickDistance");
         if (splitTickDistance) {
             this.tickDistance = toml.getLong("tickDistance").intValue();
@@ -76,6 +74,8 @@ public class TickToolsConfig {
             dynamic.maxRenderDistance = dynamicTable.getLong("maxRenderDistance").intValue();
         }
         this.itemDespawnTicks = toml.getLong("itemDespawnTicks").intValue();
+
+        this.toml = toml;
     }
 }
 
