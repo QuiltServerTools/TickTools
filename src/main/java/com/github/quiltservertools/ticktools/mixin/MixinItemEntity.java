@@ -10,12 +10,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 public class MixinItemEntity {
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 6000))
     public int ticktools$setMaximumDespawnValue(int i) {
-        var item = ((ItemEntity)(Object) this);
-        var player = item.getEntityWorld().getClosestPlayer(item.getX(), 64, item.getZ(), item.getEntityWorld().getHeight(), false);
-        if (player != null && TickToolsManager.getInstance().playerSpecific().containsKey(player.getUuid())) {
-            return TickToolsManager.getInstance().playerSpecific().get(player.getUuid()).itemDespawnTicks;
-        }
-        return TickToolsManager.getInstance().config().itemDespawnTicks;
+        return TickToolsManager.getInstance().getItemDespawnTime((ItemEntity)(Object) this);
     }
 
 }

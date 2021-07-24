@@ -1,6 +1,7 @@
+# Required options
 splitTickDistance = true
+# Required if relevant config option above is enabled
 tickDistance = 8
-itemDespawnTicks = 6000
 
 [dynamic]
 dynamicTickDistance = false
@@ -8,6 +9,10 @@ minTickDistance = 4
 dynamicRenderDistance = false
 minRenderDistance = 4
 maxRenderDistance = 12
+
+# Optional
+
+itemDespawnTicks = 6000
 
 # Example config for world specific
 # Uncomment to use
@@ -17,8 +22,8 @@ maxRenderDistance = 12
     #itemDespawnTicks = 6000
 
     #[dynamic]
-    #dynamicTickDistance = false
-    #minTickDistance = 4
-    #dynamicRenderDistance = false
-    #minRenderDistance = 4
-    #maxRenderDistance = 12
+    #   dynamicTickDistance = false
+    #   minTickDistance = 4
+    #   dynamicRenderDistance = false
+    #   minRenderDistance = 4
+    #   maxRenderDistance = 12

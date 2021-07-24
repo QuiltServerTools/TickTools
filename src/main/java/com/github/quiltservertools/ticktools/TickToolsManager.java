@@ -1,9 +1,9 @@
 package com.github.quiltservertools.ticktools;
 
 import com.github.quiltservertools.ticktools.mixin.MixinThreadedAnvilChunkStorage;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.network.packet.s2c.play.ChunkLoadDistanceS2CPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -47,6 +47,19 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
         return false;
     }
 
+    public int getItemDespawnTime(ItemEntity item) {
+        var player = item.getEntityWorld().getClosestPlayer(item.getX(), item.getY(), item.getZ(), item.getEntityWorld().getHeight(), false);
+        if (player != null) {
+            if (this.playerSpecific().containsKey(player.getUuid())) {
+                return this.playerSpecific().get(player.getUuid()).itemDespawnTicks;
+            }
+        }
+        if (this.worldSpecific().containsKey(item.getEntityWorld().getRegistryKey().getValue())) {
+            return this.worldSpecific().get(item.getEntityWorld().getRegistryKey().getValue()).itemDespawnTicks;
+        }
+        return this.config().itemDespawnTicks;
+    }
+
     public void updateRenderDistance(ServerWorld world) {
         var config = worldSpecific().get(world.getRegistryKey().getValue());
         if (config == null) config = this.config();
@@ -60,6 +73,7 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
     }
 
     private int getEffectiveTickDistance(MinecraftServer server) {
+        //TODO cache these values
         float time = server.getTickTime();
         int performanceLevel = getPerformanceLevel(time);
         var distance = config.getTickDistanceBlocks();

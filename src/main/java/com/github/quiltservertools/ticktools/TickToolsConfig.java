@@ -1,10 +1,14 @@
 package com.github.quiltservertools.ticktools;
 
 import com.moandjiezana.toml.Toml;
+import net.minecraft.util.Identifier;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class TickToolsConfig {
@@ -12,6 +16,7 @@ public class TickToolsConfig {
     public boolean splitTickDistance = true;
     public int tickDistance = 2;
     public int itemDespawnTicks = 6000;
+    public Map<Identifier, Integer> customItemValues = new HashMap<>();
 
     public TickToolsConfig.Dynamic dynamic = new Dynamic();
     public Toml toml;
@@ -59,21 +64,43 @@ public class TickToolsConfig {
     }
 
     protected void readToml(Toml toml) {
+
+        /*
+         Required config options
+         These must be present
+         */
+
         this.splitTickDistance = toml.getBoolean("splitTickDistance");
+
+        /*
+        Parsing of additional values
+         */
+
         if (splitTickDistance) {
             this.tickDistance = toml.getLong("tickDistance").intValue();
         }
-        Toml dynamicTable = toml.getTable("dynamic");
-        this.dynamic.tickDistance = dynamicTable.getBoolean("dynamicTickDistance");
-        if (dynamic.tickDistance) {
-            dynamic.minTickDistance = dynamicTable.getLong("minTickDistance").intValue();
+
+        /*
+        Optional config options
+        Must contain default value
+         */
+
+        if (toml.containsTable("dynamic")) {
+            Toml dynamicTable = toml.getTable("dynamic");
+            this.dynamic.tickDistance = dynamicTable.getBoolean("dynamicTickDistance");
+            if (dynamic.tickDistance) {
+                dynamic.minTickDistance = dynamicTable.getLong("minTickDistance").intValue();
+            }
+            this.dynamic.renderDistance = dynamicTable.getBoolean("dynamicRenderDistance");
+            if (dynamic.renderDistance) {
+                dynamic.minRenderDistance = dynamicTable.getLong("minRenderDistance").intValue();
+                dynamic.maxRenderDistance = dynamicTable.getLong("maxRenderDistance").intValue();
+            }
         }
-        this.dynamic.renderDistance = dynamicTable.getBoolean("dynamicRenderDistance");
-        if (dynamic.renderDistance) {
-            dynamic.minRenderDistance = dynamicTable.getLong("minRenderDistance").intValue();
-            dynamic.maxRenderDistance = dynamicTable.getLong("maxRenderDistance").intValue();
+
+        if (toml.contains("itemDespawnTicks")) {
+            this.itemDespawnTicks = toml.getLong("itemDespawnTicks").intValue();
         }
-        this.itemDespawnTicks = toml.getLong("itemDespawnTicks").intValue();
 
         this.toml = toml;
     }
