@@ -43,7 +43,7 @@ public class TickTools implements DedicatedServerModInitializer {
         // If table isn't null then we know that it exists
         if (table != null) {
             var config = new TickToolsConfig();
-            config.readToml(table);
+            config.readToml(table, identifier.getPath());
             TickToolsManager.getInstance().worldSpecific().put(identifier, config);
         }
     }
@@ -58,7 +58,7 @@ public class TickTools implements DedicatedServerModInitializer {
         // If table isn't null then we know that it exists
         if (table != null) {
             var config = new TickToolsConfig();
-            config.readToml(table);
+            config.readToml(table, handler.player.getUuidAsString());
             TickToolsManager.getInstance().playerSpecific().put(handler.player.getUuid(), config);
         }
     }

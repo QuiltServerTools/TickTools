@@ -49,7 +49,7 @@ public class TickToolsConfig {
         TickToolsConfig config = new TickToolsConfig();
         if (file.exists() && file.isFile()) {
             Toml toml = new Toml().read(file);
-            config.readToml(toml);
+            config.readToml(toml, null);
         } else {
             TickTools.LOGGER.info("Unable to find config file for TickTools, creating");
             try {
@@ -63,7 +63,7 @@ public class TickToolsConfig {
         return config;
     }
 
-    protected void readToml(Toml toml) {
+    protected void readToml(Toml toml, String path) {
 
         /*
          Required config options
@@ -85,17 +85,12 @@ public class TickToolsConfig {
         Must contain default value
          */
 
-        if (toml.containsTable("dynamic")) {
+        if (path != null && toml.containsTable(path + "_dynamic")) {
+            Toml dynamicTable = toml.getTable(path + "_dynamic");
+            readDynamicTable(dynamicTable);
+        } else if (toml.containsTable("dynamic")) {
             Toml dynamicTable = toml.getTable("dynamic");
-            this.dynamic.tickDistance = dynamicTable.getBoolean("dynamicTickDistance");
-            if (dynamic.tickDistance) {
-                dynamic.minTickDistance = dynamicTable.getLong("minTickDistance").intValue();
-            }
-            this.dynamic.renderDistance = dynamicTable.getBoolean("dynamicRenderDistance");
-            if (dynamic.renderDistance) {
-                dynamic.minRenderDistance = dynamicTable.getLong("minRenderDistance").intValue();
-                dynamic.maxRenderDistance = dynamicTable.getLong("maxRenderDistance").intValue();
-            }
+            readDynamicTable(dynamicTable);
         }
 
         if (toml.contains("itemDespawnTicks")) {
@@ -103,6 +98,18 @@ public class TickToolsConfig {
         }
 
         this.toml = toml;
+    }
+
+    private void readDynamicTable(Toml dynamicTable) {
+        this.dynamic.tickDistance = dynamicTable.getBoolean("dynamicTickDistance");
+        if (dynamic.tickDistance) {
+            dynamic.minTickDistance = dynamicTable.getLong("minTickDistance").intValue();
+        }
+        this.dynamic.renderDistance = dynamicTable.getBoolean("dynamicRenderDistance");
+        if (dynamic.renderDistance) {
+            dynamic.minRenderDistance = dynamicTable.getLong("minRenderDistance").intValue();
+            dynamic.maxRenderDistance = dynamicTable.getLong("maxRenderDistance").intValue();
+        }
     }
 }
 
