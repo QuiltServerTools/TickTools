@@ -30,7 +30,7 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
         if (effectiveConfig == null) effectiveConfig = this.config();
 
         // Ignore tick distance value if split tick distance is disabled
-        if (!effectiveConfig.splitTickDistance) return true;
+        if (!effectiveConfig.splitTickDistance || world.isChunkLoaded(pos.x, pos.y)) return true;
         int tickDistance = effectiveConfig.getTickDistanceBlocks();
         // Now we call the dynamic tick distance check
         if (effectiveConfig.dynamic.tickDistance) tickDistance = getEffectiveTickDistance(world.getServer());
