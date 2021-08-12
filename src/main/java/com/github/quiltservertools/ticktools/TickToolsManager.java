@@ -25,6 +25,8 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
     }
 
     public boolean shouldTickChunk(ChunkPos pos, ServerWorld world) {
+        // If chunk is force-loaded we return true
+        if (world.getForcedChunks().contains(pos.toLong())) return true;
         // First we get the right config, so checking if worldSpecific contains the dimension
         var effectiveConfig = worldSpecific().get(world.getRegistryKey().getValue());
         if (effectiveConfig == null) effectiveConfig = this.config();
