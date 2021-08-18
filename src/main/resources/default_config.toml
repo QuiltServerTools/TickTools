@@ -21,7 +21,7 @@ itemDespawnTicks = 6000
     #tickDistance = 8
     #itemDespawnTicks = 6000
 
-    #[dynamic]
+    #[the_nether.dynamic]
     #   dynamicTickDistance = false
     #   minTickDistance = 4
     #   dynamicRenderDistance = false

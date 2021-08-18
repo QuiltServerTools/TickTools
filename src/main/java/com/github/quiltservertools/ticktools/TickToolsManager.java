@@ -3,7 +3,6 @@ package com.github.quiltservertools.ticktools;
 import com.github.quiltservertools.ticktools.mixin.MixinThreadedAnvilChunkStorage;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.network.packet.s2c.play.ChunkLoadDistanceS2CPacket;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -33,9 +32,7 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
 
         // Ignore tick distance value if split tick distance is disabled
         if (!effectiveConfig.splitTickDistance) return true;
-        int tickDistance = effectiveConfig.getTickDistanceBlocks();
-        // Now we call the dynamic tick distance check
-        if (effectiveConfig.dynamic.tickDistance) tickDistance = getEffectiveTickDistance(world.getServer());
+        int tickDistance = getEffectiveTickDistance(world);
         var player = world.getClosestPlayer(pos.getCenterX(), 64, pos.getCenterZ(), world.getHeight() + tickDistance, false);
         if (player != null) {
             if (playerSpecific.containsKey(player.getUuid())) {
@@ -66,7 +63,7 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
         var config = worldSpecific().get(world.getRegistryKey().getValue());
         if (config == null) config = this.config();
         if (config.dynamic.renderDistance) {
-            int distance = getEffectiveRenderDistance(world.getServer());
+            int distance = getEffectiveRenderDistance(world);
             if (((MixinThreadedAnvilChunkStorage) world.getChunkManager().threadedAnvilChunkStorage).getWatchDistance() != distance) {
                 world.getChunkManager().applyViewDistance(distance);
                 world.getServer().getPlayerManager().sendToAll(new ChunkLoadDistanceS2CPacket(distance));
@@ -74,31 +71,45 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
         }
     }
 
-    private int getEffectiveTickDistance(MinecraftServer server) {
+    public int getEffectiveTickDistance(ServerWorld world) {
         //TODO cache these values
-        float time = server.getTickTime();
+        float time = world.getServer().getTickTime();
         int performanceLevel = getPerformanceLevel(time);
-        var distance = config.getTickDistanceBlocks();
-        if (performanceLevel == 3) distance = config.dynamic.getMinTickDistanceBlocks();
-        else if (performanceLevel == 2)
-            distance = Math.min((int)(config.getTickDistanceBlocks() / 1.5F), (int)(config.getTickDistanceBlocks() * 1.5F));
-        else if (performanceLevel == 1)
-            distance = Math.max((int)(config.getTickDistanceBlocks() / 1.5F), (int)(config.getTickDistanceBlocks() * 1.5F));
-        else distance = config.getTickDistanceBlocks();
-        return distance;
+
+        var config = worldSpecific().get(world.getRegistryKey().getValue());
+        if (config == null) config = this.config();
+
+        if (config.dynamic.tickDistance) {
+            var distance = config.getTickDistanceBlocks();
+            if (performanceLevel == 3) distance = config.dynamic.getMinTickDistanceBlocks();
+            else if (performanceLevel == 2)
+                distance = Math.min((int)(config.getTickDistanceBlocks() / 1.5F), (int)(config.getTickDistanceBlocks() * 1.5F));
+            else if (performanceLevel == 1)
+                distance = Math.max((int)(config.getTickDistanceBlocks() / 1.5F), (int)(config.getTickDistanceBlocks() * 1.5F));
+            else distance = config.getTickDistanceBlocks();
+            return distance;
+        }
+        return config.tickDistance;
     }
 
-    private int getEffectiveRenderDistance(MinecraftServer server) {
-        float time = server.getTickTime();
+    public int getEffectiveRenderDistance(ServerWorld world) {
+        float time = world.getServer().getTickTime();
         int performanceLevel = getPerformanceLevel(time);
-        var distance = config().dynamic.maxRenderDistance;
-        if (performanceLevel == 3) distance = config.dynamic.minRenderDistance;
-        else if (performanceLevel == 2)
-            distance = Math.min((int) (config.dynamic.maxRenderDistance / 1.5F), (int) (config.dynamic.minRenderDistance * 1.5F));
-        else if (performanceLevel == 1)
-            distance = Math.max((int) (config.dynamic.maxRenderDistance / 1.5F), (int) (config.dynamic.minRenderDistance * 1.5F));
-        else distance = config.dynamic.minRenderDistance;
-        return distance;
+
+        var config = worldSpecific().get(world.getRegistryKey().getValue());
+        if (config == null) config = this.config();
+
+        if (config.dynamic.renderDistance) {
+            var distance = config.dynamic.maxRenderDistance;
+            if (performanceLevel == 3) distance = config.dynamic.minRenderDistance;
+            else if (performanceLevel == 2)
+                distance = Math.min((int) (config.dynamic.maxRenderDistance / 1.5F), (int) (config.dynamic.minRenderDistance * 1.5F));
+            else if (performanceLevel == 1)
+                distance = Math.max((int) (config.dynamic.maxRenderDistance / 1.5F), (int) (config.dynamic.minRenderDistance * 1.5F));
+            else distance = config.dynamic.minRenderDistance;
+            return distance;
+        }
+        return getWatchDistance(world);
     }
 
     private int getPerformanceLevel(float time) {
@@ -106,5 +117,9 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
         else if (time > 32F) return 2;
         else if (time > 25F) return 1;
         return 1;
+    }
+
+    private int getWatchDistance(ServerWorld world) {
+        return ((MixinThreadedAnvilChunkStorage) world.getChunkManager().threadedAnvilChunkStorage).getWatchDistance();
     }
 }

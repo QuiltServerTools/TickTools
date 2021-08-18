@@ -3,12 +3,13 @@
   "minVersion": "0.8",
   "package": "com.github.quiltservertools.ticktools.mixin",
   "compatibilityLevel": "JAVA_16",
-  "server": [
-    "MixinServerWorld",
-    "MixinItemEntity",
-    "MixinThreadedAnvilChunkStorage"
-  ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "MixinServerPlayerEntity",
+    "MixinItemEntity",
+    "MixinServerWorld",
+    "MixinThreadedAnvilChunkStorage"
+  ]
 }

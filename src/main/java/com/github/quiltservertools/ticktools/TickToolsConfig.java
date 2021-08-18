@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -49,11 +48,11 @@ public class TickToolsConfig {
         TickToolsConfig config = new TickToolsConfig();
         if (file.exists() && file.isFile()) {
             Toml toml = new Toml().read(file);
-            config.readToml(toml, null);
+            config.readToml(toml);
         } else {
             TickTools.LOGGER.info("Unable to find config file for TickTools, creating");
             try {
-                Files.copy(Objects.requireNonNull(TickToolsConfig.class.getResourceAsStream("/data/ticktools/default_config.toml")), file.toPath());
+                Files.copy(Objects.requireNonNull(TickToolsConfig.class.getResourceAsStream("/default_config.toml")), file.toPath());
             } catch (IOException e) {
                 TickTools.LOGGER.warn("Unable to create config file for TickTools, using default configuration");
             }
@@ -63,7 +62,7 @@ public class TickToolsConfig {
         return config;
     }
 
-    protected void readToml(Toml toml, String path) {
+    protected void readToml(Toml toml) {
 
         /*
          Required config options
@@ -84,11 +83,7 @@ public class TickToolsConfig {
         Optional config options
         Must contain default value
          */
-
-        if (path != null && toml.containsTable(path + "_dynamic")) {
-            Toml dynamicTable = toml.getTable(path + "_dynamic");
-            readDynamicTable(dynamicTable);
-        } else if (toml.containsTable("dynamic")) {
+        if (toml.containsTable("dynamic")) {
             Toml dynamicTable = toml.getTable("dynamic");
             readDynamicTable(dynamicTable);
         }
