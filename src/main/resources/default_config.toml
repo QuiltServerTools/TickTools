@@ -1,5 +1,5 @@
 # Required options
-splitTickDistance = true
+splitTickDistance = false
 # Required if relevant config option above is enabled
 tickDistance = 8
 
@@ -9,6 +9,7 @@ minTickDistance = 4
 dynamicRenderDistance = false
 minRenderDistance = 4
 maxRenderDistance = 12
+targetMSPT = 50
 
 # Optional
 

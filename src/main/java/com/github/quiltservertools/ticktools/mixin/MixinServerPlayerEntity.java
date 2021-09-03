@@ -15,7 +15,7 @@ public class MixinServerPlayerEntity {
     @Inject(method = "worldChanged", at = @At("HEAD"))
     public void ticktools$syncRenderDistance(ServerWorld origin, CallbackInfo ci) {
         ServerWorld world = ((ServerPlayerEntity) (Object) this).getServerWorld();
-        int distance = TickToolsManager.getInstance().getEffectiveRenderDistance(world);
+        int distance = ((MixinThreadedAnvilChunkStorage) world.getChunkManager().threadedAnvilChunkStorage).getWatchDistance();
         ((ServerPlayerEntity) (Object) this).networkHandler.sendPacket(new ChunkLoadDistanceS2CPacket(distance));
     }
 }
