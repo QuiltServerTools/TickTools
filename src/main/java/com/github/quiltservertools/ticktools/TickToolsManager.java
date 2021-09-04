@@ -100,7 +100,7 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
         if (config == null) config = this.config();
 
         if (config.dynamic.renderDistance) {
-            if (world.getPlayers().isEmpty()) return config.dynamic.minRenderDistance;
+            if (world.getPlayers().isEmpty()) return getWatchDistance(world);
             var currentDistance = getWatchDistance(world);
 
             var avgTickTime = MathHelper.average(world.getServer().lastTickLengths) * 1.0E-6D;

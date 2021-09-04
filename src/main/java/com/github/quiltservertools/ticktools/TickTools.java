@@ -40,12 +40,16 @@ public class TickTools implements DedicatedServerModInitializer {
         var identifier = world.getRegistryKey().getValue();
         var table = TickToolsManager.getInstance().config().toml.getTable(identifier.getPath());
 
+        var config = TickToolsManager.getInstance().config();
         // If table isn't null then we know that it exists
         if (table != null) {
-            var config = new TickToolsConfig();
+            config = new TickToolsConfig();
             config.readToml(table);
             TickToolsManager.getInstance().worldSpecific().put(identifier, config);
         }
+
+        if (config.dynamic.renderDistance)
+            world.getChunkManager().applyViewDistance(config.dynamic.minRenderDistance);
     }
 
     private void onWorldUnload(MinecraftServer server, ServerWorld world) {
