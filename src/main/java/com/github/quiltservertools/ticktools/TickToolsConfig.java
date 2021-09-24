@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import net.fabricmc.loader.api.FabricLoader;
+
 public class TickToolsConfig {
 
     public boolean splitTickDistance = true;
@@ -46,17 +48,15 @@ public class TickToolsConfig {
 
     public static TickToolsConfig loadConfig(File file) {
         TickToolsConfig config = new TickToolsConfig();
-        if (file.exists() && file.isFile()) {
-            Toml toml = new Toml().read(file);
-            config.readToml(toml);
-        } else {
+        if (!(file.exists() && file.isFile())) {
             TickTools.LOGGER.info("Unable to find config file for TickTools, creating");
             try {
-                Files.copy(Objects.requireNonNull(TickToolsConfig.class.getResourceAsStream("/default_config.toml")), file.toPath());
+                Files.copy(FabricLoader.getInstance().getModContainer("ticktools").get().getPath("default_config.toml"), file.toPath());
             } catch (IOException e) {
                 TickTools.LOGGER.warn("Unable to create config file for TickTools, using default configuration");
             }
         }
+        config.readToml(new Toml().read(file));
 
         // Config is default config
         return config;
