@@ -28,7 +28,7 @@ public class TickToolsConfig {
         public int minTickDistance = 4;
         public int minRenderDistance = 8;
         public int maxRenderDistance = 12;
-        public int targetMSPT = 50;
+        public double targetMSPT = 50;
 
         public int getMinTickDistanceBlocks() {
             return minTickDistance * 16;
@@ -105,6 +105,9 @@ public class TickToolsConfig {
         if (dynamic.renderDistance) {
             dynamic.minRenderDistance = dynamicTable.getLong("minRenderDistance").intValue();
             dynamic.maxRenderDistance = dynamicTable.getLong("maxRenderDistance").intValue();
+        }
+        if (dynamicTable.contains("targetMSPT")) {
+            dynamic.targetMSPT = dynamicTable.getDouble("targetMSPT");
         }
     }
 }

@@ -5,16 +5,38 @@ A Minecraft mod for managing tick-related things
 ## Config
 
 ```toml
-splitTickDistance = true
+# Required options
+splitTickDistance = false
+# Required if relevant config option above is enabled
 tickDistance = 8
-itemDespawnTicks = 6000
 
 [dynamic]
 dynamicTickDistance = false
 minTickDistance = 4
 dynamicRenderDistance = false
-minRenderDistance = 6
-maxRenderDistance = 10
+minRenderDistance = 4
+maxRenderDistance = 12
+# This value controls the MSPT used to target
+targetMSPT = 50.0
+
+# Optional
+
+itemDespawnTicks = 6000
+
+# Example config for world specific
+# Uncomment to use
+#[the_nether]
+#splitTickDistance = true
+#tickDistance = 8
+#itemDespawnTicks = 6000
+
+#[the_nether.dynamic]
+#   dynamicTickDistance = false
+#   minTickDistance = 4
+#   dynamicRenderDistance = false
+#   minRenderDistance = 4
+#   maxRenderDistance = 12
+
 ```
 
 #### Quick overview of each config option
@@ -36,6 +58,18 @@ maxRenderDistance = 10
 
 `maxRenderDistance` controls the maximum render distance when `dynamicRenderDistance` is enabled
 
+`targetMSPT` is the MSPT that the server will reduce the render distance to try and achieve, when dynamic render distance is enabled
+
+
+## Commands
+
+### Status Command
+
+`/ticktools status`
+
+Shows the current tick and render distances of all loaded worlds in the following format:
+
+`World identifier: Render/Tick`
 
 ## Discuss
 

@@ -5,10 +5,8 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.network.packet.s2c.play.ChunkLoadDistanceS2CPacket;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
 
 import java.util.Map;
 import java.util.UUID;
@@ -66,7 +64,7 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
         var config = worldSpecific().get(world.getRegistryKey().getValue());
         if (config == null) config = this.config();
         if (config.dynamic.renderDistance) {
-            int distance = getEffectiveRenderDistance(world);
+            int distance = getEffectiveRenderDistance(world, true);
             if (((MixinThreadedAnvilChunkStorage) world.getChunkManager().threadedAnvilChunkStorage).getWatchDistance() != distance) {
                 world.getChunkManager().applyViewDistance(distance - 1);
                 world.getServer().getPlayerManager().sendToAll(new ChunkLoadDistanceS2CPacket(distance - 1));
@@ -95,7 +93,7 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
         return config.tickDistance;
     }
 
-    public int getEffectiveRenderDistance(ServerWorld world) {
+    public int getEffectiveRenderDistance(ServerWorld world, boolean messages) {
         var config = worldSpecific().get(world.getRegistryKey().getValue());
         if (config == null) config = this.config();
 
@@ -107,14 +105,20 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
 
             if (avgTickTime > config.dynamic.targetMSPT && currentDistance - 1 > config.dynamic.minTickDistance) {
                 currentDistance--;
-                TickTools.LOGGER.info(String.format("Avg MSPT: %.2f above %d. Decreasing view distance in %s to %d",
-                        avgTickTime, config.dynamic.targetMSPT, world.getRegistryKey().getValue(), currentDistance - 1
-                ));
+                if (messages) {
+                    TickTools.LOGGER.info(String.format("Avg MSPT: %.2f above %d. Decreasing view distance in %s to %d",
+                            // We cast target MSPT to int to make it look better
+                            // In reality this value is a double, like in the config
+                            avgTickTime, (int) config.dynamic.targetMSPT, world.getRegistryKey().getValue(), currentDistance - 1
+                    ));
+                }
             } else if (avgTickTime < config.dynamic.targetMSPT && currentDistance - 1 < config.dynamic.maxRenderDistance) {
                 currentDistance++;
-                TickTools.LOGGER.info(String.format("Avg MSPT: %.2f below %d. Increasing view distance in %s to to %d",
-                        avgTickTime, config.dynamic.targetMSPT, world.getRegistryKey().getValue(), currentDistance - 1
-                ));
+                if (messages) {
+                    TickTools.LOGGER.info(String.format("Avg MSPT: %.2f below %d. Increasing view distance in %s to to %d",
+                            avgTickTime, (int) config.dynamic.targetMSPT, world.getRegistryKey().getValue(), currentDistance - 1
+                    ));
+                }
             }
 
             return currentDistance;

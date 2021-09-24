@@ -9,7 +9,8 @@ minTickDistance = 4
 dynamicRenderDistance = false
 minRenderDistance = 4
 maxRenderDistance = 12
-targetMSPT = 50
+# This value controls the MSPT used to target
+targetMSPT = 50.0
 
 # Optional
 
