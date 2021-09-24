@@ -28,6 +28,7 @@ public class TickToolsConfig {
         public int minTickDistance = 4;
         public int minRenderDistance = 8;
         public int maxRenderDistance = 12;
+        public int targetMSPT = 50;
 
         public int getMinTickDistanceBlocks() {
             return minTickDistance * 16;

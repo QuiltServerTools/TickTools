@@ -29,7 +29,7 @@ public class MixinServerWorld {
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void ticktools$updateDynamics(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
-        if (((ServerWorld) (Object) this).getTime() % 1000 == 0) {
+        if (((ServerWorld) (Object) this).getTime() % 400 == 0) {
             TickToolsManager.getInstance().updateRenderDistance((ServerWorld) (Object) this);
         }
     }

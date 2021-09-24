@@ -7,11 +7,14 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
 
 import java.util.Map;
 import java.util.UUID;
 
-public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickToolsConfig> worldSpecific, Map<UUID, TickToolsConfig> playerSpecific) {
+public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickToolsConfig> worldSpecific,
+                               Map<UUID, TickToolsConfig> playerSpecific) {
 
     private static TickToolsManager instance;
 
@@ -36,10 +39,10 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
         var player = world.getClosestPlayer(pos.getCenterX(), 64, pos.getCenterZ(), world.getHeight() + tickDistance, false);
         if (player != null) {
             if (playerSpecific.containsKey(player.getUuid())) {
-                return player.getBlockPos().isWithinDistance(new BlockPos(pos.getCenterX(), player.getY(), pos.getCenterZ()), playerSpecific.get(player.getUuid()).tickDistance);
+                return pos.getChebyshevDistance(player.getChunkPos()) <= playerSpecific.get(player.getUuid()).tickDistance;
             } else {
                 // The closest player on the server is within the tick distance provided by the config
-                return player.getBlockPos().isWithinDistance(new BlockPos(pos.getCenterX(), player.getY(), pos.getCenterZ()), tickDistance);
+                return pos.getChebyshevDistance(player.getChunkPos()) <= tickDistance;
                 // If player is not found within distance then use default return value
             }
         }
@@ -65,8 +68,8 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
         if (config.dynamic.renderDistance) {
             int distance = getEffectiveRenderDistance(world);
             if (((MixinThreadedAnvilChunkStorage) world.getChunkManager().threadedAnvilChunkStorage).getWatchDistance() != distance) {
-                world.getChunkManager().applyViewDistance(distance);
-                world.getServer().getPlayerManager().sendToAll(new ChunkLoadDistanceS2CPacket(distance));
+                world.getChunkManager().applyViewDistance(distance - 1);
+                world.getServer().getPlayerManager().sendToAll(new ChunkLoadDistanceS2CPacket(distance - 1));
             }
         }
     }
@@ -83,9 +86,9 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
             var distance = config.getTickDistanceBlocks();
             if (performanceLevel == 3) distance = config.dynamic.getMinTickDistanceBlocks();
             else if (performanceLevel == 2)
-                distance = Math.min((int)(config.getTickDistanceBlocks() / 1.5F), (int)(config.getTickDistanceBlocks() * 1.5F));
+                distance = Math.min((int) (config.getTickDistanceBlocks() / 1.5F), (int) (config.getTickDistanceBlocks() * 1.5F));
             else if (performanceLevel == 1)
-                distance = Math.max((int)(config.getTickDistanceBlocks() / 1.5F), (int)(config.getTickDistanceBlocks() * 1.5F));
+                distance = Math.max((int) (config.getTickDistanceBlocks() / 1.5F), (int) (config.getTickDistanceBlocks() * 1.5F));
             else distance = config.getTickDistanceBlocks();
             return distance;
         }
@@ -93,21 +96,28 @@ public record TickToolsManager(TickToolsConfig config, Map<Identifier, TickTools
     }
 
     public int getEffectiveRenderDistance(ServerWorld world) {
-        float time = world.getServer().getTickTime();
-        int performanceLevel = getPerformanceLevel(time);
-
         var config = worldSpecific().get(world.getRegistryKey().getValue());
         if (config == null) config = this.config();
 
         if (config.dynamic.renderDistance) {
-            var distance = config.dynamic.maxRenderDistance;
-            if (performanceLevel == 3) distance = config.dynamic.minRenderDistance;
-            else if (performanceLevel == 2)
-                distance = Math.min((int) (config.dynamic.maxRenderDistance / 1.5F), (int) (config.dynamic.minRenderDistance * 1.5F));
-            else if (performanceLevel == 1)
-                distance = Math.max((int) (config.dynamic.maxRenderDistance / 1.5F), (int) (config.dynamic.minRenderDistance * 1.5F));
-            else distance = config.dynamic.minRenderDistance;
-            return distance;
+            if (world.getPlayers().isEmpty()) return getWatchDistance(world);
+            var currentDistance = getWatchDistance(world);
+
+            var avgTickTime = MathHelper.average(world.getServer().lastTickLengths) * 1.0E-6D;
+
+            if (avgTickTime > config.dynamic.targetMSPT && currentDistance - 1 > config.dynamic.minTickDistance) {
+                currentDistance--;
+                TickTools.LOGGER.info(String.format("Avg MSPT: %.2f above %d. Decreasing view distance in %s to %d",
+                        avgTickTime, config.dynamic.targetMSPT, world.getRegistryKey().getValue(), currentDistance - 1
+                ));
+            } else if (avgTickTime < config.dynamic.targetMSPT && currentDistance - 1 < config.dynamic.maxRenderDistance) {
+                currentDistance++;
+                TickTools.LOGGER.info(String.format("Avg MSPT: %.2f below %d. Increasing view distance in %s to to %d",
+                        avgTickTime, config.dynamic.targetMSPT, world.getRegistryKey().getValue(), currentDistance - 1
+                ));
+            }
+
+            return currentDistance;
         }
         return getWatchDistance(world);
     }
